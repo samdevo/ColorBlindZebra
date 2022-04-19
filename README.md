@@ -1,5 +1,6 @@
 # ColorBlindZebra
-Introduction
+
+## Introduction
 
 We are trying to colorize black and white images. We are interested in what images that are black and white would look like in color, especially old images which weren't originally captured with color.
 
@@ -11,24 +12,24 @@ Related Work
 
 We looked at another application (https://cs230.stanford.edu/projects_fall_2019/reports/26259829.pdf) of GANs used for structured prediction, this time, predicting the stock market price of companies. The paper looked at using GAN, LSTM, and traditional time series models. They concluded that GANs can make very accurate predictions of time series data, and there were no significant advantages with using a GAN over models traditionally used like LSTM or other time series analysis.
 
-Data
+## Data
 
 
 We plan on using ImageNet for our data. The data is 14 million images of size 256x256. We will most likely have to cut down the number of images we use, but are not entirely sure how small our data set will get. We may also explore scraping images from Instagram, Facebook, etc to use for our data.
 
-Methodology
+## Methodology
 
 
 Our architecture will be a conditional GAN. We are training our model using Image Net images on a mix of google cloud and the department machines. We think the hardest part of the paper will be optimization to make our model perform well.
 
-Metrics
+## Metrics
 
 
 We will measure success with how plausible the image colorization is. We plan to look at old images which are in black and white to see what they might've looked like with color, and we may scrap images from instagram and see what those look like in color. We plan on using PSNR to (peak signal to noise ratio) as our metric to measure the quality of the image reconstruction. The paper also mentions another method SSIM (structural similarity index measure) to take into account factors such as luminance, contrast, and structural change between two images. They were able to reach an average PSNR score of 20.94, and an average SSIM score of .85
 
 Our base goal is to be able to colorize black and white images in a semi plausible way. Our target goal is to be able to colorize images where human eyes are not able to tell if they were captured in color, or if the image was black and white and has been colorized. Our stretch goal is to get a low PSNR, where our model is almost able to perfectly colorize images. Another stretch goal would be getting an SSIM average of .9 or above.
 
-Ethics
+## Ethics
 
 
 What broader societal issues are relevant to your chosen problem?
