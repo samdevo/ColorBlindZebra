@@ -4,25 +4,25 @@ import matplotlib.pyplot as plt
 
 
 class Generator(tf.keras.Model):
-    def __init__(self, output_shape):
+    def __init__(self):
+        super(Generator, self).__init__()
 
-        self.output_shape = output_shape
 
         self.encoders = [
-            Encoder_Block(64, 4, batchnorm=False),
+            Encoder_Block(64, 4, batchnorm=False, input_shape=(256,256,3)),
             Encoder_Block(128,4),
             Encoder_Block(256,4),
             Encoder_Block(512,4),
             Encoder_Block(512,4),
-            Encoder_Block(512,4),
-            Encoder_Block(512,4),
-            Encoder_Block(512,4), #1x512
+            # Encoder_Block(512,4),
+            # Encoder_Block(512,4),
+            # Encoder_Block(512,4), #1x512
         ]
 
         self.decoders = [
-            Decoder_Block(512,4),
-            Decoder_Block(512,4),
-            Decoder_Block(512,4),
+            # Decoder_Block(512,4),
+            # Decoder_Block(512,4),
+            # Decoder_Block(512,4),
             Decoder_Block(512,4),
             Decoder_Block(256,4),
             Decoder_Block(128,4),
@@ -44,7 +44,7 @@ class Generator(tf.keras.Model):
             if i == 0:
                 decoder_out = layer(encoder_outs[-1])
             else:
-                corresponding_encoded = encoder_outs[len(self.decoders) - i - 2]
+                corresponding_encoded = encoder_outs[len(self.decoders) - i - 1]
                 concat = tf.keras.layers.Concatenate()([decoder_out, corresponding_encoded])
                 decoder_out = layer(concat)
 
@@ -53,10 +53,24 @@ class Generator(tf.keras.Model):
 
 
 class Encoder_Block(tf.keras.layers.Layer):
-    def __init__(self, num_filters, kernel_size=3, strides=2, batchnorm=True):
+    def __init__(self, num_filters, kernel_size=3, strides=2, batchnorm=True, input_shape=None):
         super(Encoder_Block, self).__init__()
-
-        self.conv_layer = tf.keras.layers.Conv2D(num_filters, kernel_size, strides=strides, padding='same')
+        print(input_shape)
+        if input_shape is not None: 
+            self.conv_layer = tf.keras.layers.Conv2D(
+                num_filters, 
+                kernel_size, 
+                strides=strides, 
+                padding='same', 
+                input_shape=input_shape
+            )
+        else:
+            self.conv_layer = tf.keras.layers.Conv2D(
+                num_filters, 
+                kernel_size, 
+                strides=strides, 
+                padding='same'
+            )
         self.batch_norm = batchnorm
         if batchnorm:
             self.batch_norm = tf.keras.layers.BatchNormalization()
@@ -78,7 +92,13 @@ class Decoder_Block(tf.keras.layers.Layer):
     def __init__(self, num_filters, kernel_size=3, strides=2):
         super(Decoder_Block, self).__init__()
 
-        self.conv_t_layer = tf.keras.layers.Conv2DTranspose(num_filters, kernel_size, strides=strides, padding='same')
+        self.conv_t_layer = tf.keras.layers.Conv2DTranspose(
+            num_filters, 
+            kernel_size, 
+            strides=strides, 
+            padding='same'
+        )
+
         self.batch_norm = tf.keras.layers.BatchNormalization()
         self.relu = tf.keras.layers.ReLU()
 
