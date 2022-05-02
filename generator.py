@@ -1,5 +1,6 @@
+from json import decoder
 import tensorflow as tf
-
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -14,15 +15,15 @@ class Generator(tf.keras.Model):
             Encoder_Block(256,4),
             Encoder_Block(512,4),
             Encoder_Block(512,4),
-            # Encoder_Block(512,4),
-            # Encoder_Block(512,4),
-            # Encoder_Block(512,4), #1x512
+            Encoder_Block(512,4),
+            Encoder_Block(512,4),
+            Encoder_Block(512,4), #1x512
         ]
 
         self.decoders = [
-            # Decoder_Block(512,4),
-            # Decoder_Block(512,4),
-            # Decoder_Block(512,4),
+            Decoder_Block(512,4),
+            Decoder_Block(512,4),
+            Decoder_Block(512,4),
             Decoder_Block(512,4),
             Decoder_Block(256,4),
             Decoder_Block(128,4),
@@ -30,7 +31,7 @@ class Generator(tf.keras.Model):
             tf.keras.layers.Conv2DTranspose(3, 4, strides=2, padding='same', activation='tanh')
         ]
 
-    @tf.function
+    # @tf.function
     def call(self, input):
         encoder_outs = []
         for i,layer in enumerate(self.encoders):
@@ -47,8 +48,12 @@ class Generator(tf.keras.Model):
                 corresponding_encoded = encoder_outs[len(self.decoders) - i - 1]
                 concat = tf.keras.layers.Concatenate()([decoder_out, corresponding_encoded])
                 decoder_out = layer(concat)
-
-
+        # print(decoder_out[0].numpy())
+        # exit(0)
+        pil_img = tf.keras.preprocessing.image.array_to_img(input[0].numpy())
+        pil_img.show()
+        pil_img = tf.keras.preprocessing.image.array_to_img(decoder_out[0].numpy())
+        pil_img.show()
         return decoder_out
 
 
