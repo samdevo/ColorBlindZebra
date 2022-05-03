@@ -1,33 +1,44 @@
-import gzip
-import numpy as np
-import pickle
-from cv2 import cv2
+import tensorflow as tf
+import tensorflow_datasets as tfds
 
-#pip install opencv-python
-#Link to dataset: https://www.cs.toronto.edu/~kriz/cifar.html
 
-def get_data(inputs_file_path):
-    """
-Each of the batch files contains a dictionary with the following elements:
-data -- a 10000x3072 numpy array of uint8s. Each row of the array stores a 32x32 colour image. 
-The first 1024 entries contain the red channel values, the next 1024 the green,
- and the final 1024 the blue. The image is stored in row-major order, so that 
-the first 32 entries of the array are the red channel values of the first row of the image.
-(NOT USING): labels -- a list of 10000 numbers in the range 0-9. The number at index i indicates 
-the label of the ith image in the array data.
-    """
-    
-    with open(inputs_file_path, 'rb') as fo:
-        dict = pickle.load(fo, encoding='bytes')
-    return dict[0]
 
-def make_BW_images(inputs_file_path):
 
-    "Returning black and white version of colorized dataset -- a 10000x3072 numpy array of uint8s"
+def prepare_image(file):
+    image = file["image"]
+    normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./127.5, offset=-1)
 
-    colorized_images = get_data(inputs_file_path)
-    bw_images = []
-    for photo in colorized_images:
-        bw_images.append(cv2.cvtColor(photo, cv2.COLOR_BGR2GRAY))
-    bw_images = np.array(bw_images)
-    return bw_images
+    image = tf.image.resize_with_crop_or_pad(image, 128, 128)
+    image = normalization_layer(image)
+    image_bw = tf.image.grayscale_to_rgb(tf.image.rgb_to_grayscale(image))
+
+    return image_bw, image
+
+     
+
+def get_data(batch_size):
+    # ds = tfds.load('imagenet_v2', split='test', shuffle_files=True)
+    mnist_builder = tfds.builder("stl10")
+    mnist_builder.download_and_prepare()
+    dataset = mnist_builder.as_dataset()["train"]
+
+    assert isinstance(dataset, tf.data.Dataset)
+
+    dataset = dataset.shuffle(1024)
+
+    dataset = dataset.map(prepare_image).batch(batch_size)
+
+    return dataset
+
+# ds = get_data(128)
+# i = 0
+# for batch_images, batch_labels in ds:
+#     img = batch_images[0]
+#     pil_img = tf.keras.preprocessing.image.array_to_img(img)
+    # pil_img.show()
+#     i += 1
+#     if i > 10: break
+
+
+
+
