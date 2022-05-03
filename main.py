@@ -1,5 +1,5 @@
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+os.environ['TF_CPP_MIN_LOG_LEVEL']='1'
 
 import tensorflow as tf
 
@@ -12,7 +12,6 @@ import datetime
 
 
 if __name__ == '__main__':
-    print("helluh")
     gen_model = Generator()
     gen_model.compile(
         optimizer='adam',
@@ -43,8 +42,10 @@ if __name__ == '__main__':
     # gen_model(x)
     # gen_model.summary()
 
-    log_dir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_graph=True)
-    gen_model.fit(dataset, epochs=1,callbacks=[tensorboard_callback])
+    # log_dir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_graph=True)
+    # gen_model.fit(dataset, epochs=1,callbacks=[tensorboard_callback])
+    gen_model.fit(dataset, epochs=1)
 
     tf.keras.utils.plot_model(gen_model, show_shapes=True, dpi=64)
+
