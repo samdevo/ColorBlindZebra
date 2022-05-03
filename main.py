@@ -9,7 +9,6 @@ import datetime
 
 
 if __name__ == '__main__':
-    print("helluh")
     gen_model = Generator()
     gen_model.compile(
         optimizer='adam',
@@ -18,10 +17,7 @@ if __name__ == '__main__':
         run_eagerly=True
     )
 
-    # images = get_data('cifar-10-python.tar.gz')
-    # images_BW = make_BW_images('cifar-10-python.tar.gz')
-    dataset = get_data_sam(64)
-    # bw = tf.image.rgb_to_grayscale(images)
+    dataset = get_data_sam(batch_size = 64)
 
     # i = 0
     # print(dataset)
@@ -35,13 +31,15 @@ if __name__ == '__main__':
     #     pil_img.show()
     #     i += 1
     #     if i > 3: break
-    
+   
     # x = tf.ones((1,256,256,3))
     # gen_model(x)
     # gen_model.summary()
 
-    log_dir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_graph=True)
-    gen_model.fit(dataset, epochs=1,callbacks=[tensorboard_callback])
+    # TODO log_dir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_graph=True)
+    # gen_model.fit(dataset, epochs=1,callbacks=[tensorboard_callback])
+    print(dataset)
+    gen_model.fit(dataset, epochs=1)
 
     tf.keras.utils.plot_model(gen_model, show_shapes=True, dpi=64)

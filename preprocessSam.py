@@ -1,14 +1,19 @@
 import tensorflow as tf
 import tensorflow_datasets as tfds
+from rich.traceback import install
+
+install()
 
 
 
 
-def prepare_image(file):
-    image = file["input"]
+def prepare_image(file):        
+    print(file)
+    image = file["image"]
+    # Turns inputs in [0,255] to be in [-1,1]
     normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./127.5, offset=-1)
 
-    image = tf.image.resize_with_crop_or_pad(image, 256, 256)
+    image = tf.image.resize_with_crop_or_pad(image, 128, 128)
     image = normalization_layer(image)
     image_bw = tf.image.grayscale_to_rgb(tf.image.rgb_to_grayscale(image))
 
@@ -19,10 +24,10 @@ def prepare_image(file):
 def get_data(batch_size):
     # ds = tfds.load('imagenet_v2', split='test', shuffle_files=True)
     # mnist_builder = tfds.builder("stanford_dogs")
-    mnist_builder = tfds.builder("bee_dataset")
+    mnist_builder = tfds.builder("stl10")
     mnist_info = mnist_builder.info
     mnist_builder.download_and_prepare()
-    dataset = mnist_builder.as_dataset()["train"]
+    dataset = mnist_builder.as_dataset()["train"] # change to unlabelled for big dataset
 
     assert isinstance(dataset, tf.data.Dataset)
 
