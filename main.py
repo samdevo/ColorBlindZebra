@@ -1,26 +1,30 @@
 import tensorflow as tf
 
 import matplotlib.pyplot as plt
+from discriminator import Discriminator
 
 from generator import Generator
-from preprocess import get_data, make_BW_images
+# from preprocess import get_data, make_BW_images
 from preprocessSam import get_data as get_data_sam
 import datetime
+from train import train_epoch
 
 
 if __name__ == '__main__':
     print("helluh")
+    # exit(0)
     gen_model = Generator()
-    gen_model.compile(
-        optimizer='adam',
-        loss='MAE',
-        metrics=['MAE'],
-        run_eagerly=True
-    )
+    disc_model = Discriminator()
+    # gen_model.compile(
+    #     optimizer='adam',
+    #     loss='MAE',
+    #     metrics=['MAE'],
+    #     run_eagerly=True
+    # )
 
     # images = get_data('cifar-10-python.tar.gz')
     # images_BW = make_BW_images('cifar-10-python.tar.gz')
-    dataset = get_data_sam(64)
+    dataset = get_data_sam(4)
     # bw = tf.image.rgb_to_grayscale(images)
 
     # i = 0
@@ -42,6 +46,6 @@ if __name__ == '__main__':
 
     log_dir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_graph=True)
-    gen_model.fit(dataset, epochs=1,callbacks=[tensorboard_callback])
+    train_epoch(gen_model, disc_model, dataset)
 
     tf.keras.utils.plot_model(gen_model, show_shapes=True, dpi=64)

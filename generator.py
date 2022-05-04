@@ -1,6 +1,4 @@
-from json import decoder
 import tensorflow as tf
-import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -31,7 +29,8 @@ class Generator(tf.keras.Model):
             tf.keras.layers.Conv2DTranspose(3, 4, strides=2, padding='same', activation='tanh')
         ]
 
-    # @tf.function
+        self.optimizer = tf.keras.optimizers.Adam()
+
     def call(self, input):
         encoder_outs = []
         for i,layer in enumerate(self.encoders):
@@ -56,9 +55,22 @@ class Generator(tf.keras.Model):
         pil_img.show()
         return decoder_out
 
+    def loss_function(self, fake, d_fake, real, l=10000):
+        d_loss_fn = tf.nn.sigmoid_cross_entropy_with_logits
+
+        d_loss = tf.reduce_mean(d_loss_fn(tf.ones_like(d_fake), d_fake))
+
+        mae_loss_fn = tf.keras.losses.MeanAbsoluteError()
+
+        mae_loss = tf.reduce_mean(mae_loss_fn(real, fake))
+
+        return d_loss + mae_loss * l
+
+
+
 
 class Encoder_Block(tf.keras.layers.Layer):
-    def __init__(self, num_filters, kernel_size=3, strides=2, batchnorm=True, input_shape=None):
+    def __init__(self, num_filters, kernel_size=3, strides=2, batchnorm=True, input_shape=None, padding='same'):
         super(Encoder_Block, self).__init__()
         print(input_shape)
         if input_shape is not None: 
@@ -66,7 +78,7 @@ class Encoder_Block(tf.keras.layers.Layer):
                 num_filters, 
                 kernel_size, 
                 strides=strides, 
-                padding='same', 
+                padding=padding, 
                 input_shape=input_shape
             )
         else:

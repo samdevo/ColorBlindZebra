@@ -5,7 +5,7 @@ import tensorflow_datasets as tfds
 
 
 def prepare_image(file):
-    image = file["input"]
+    image = file["image"]
     normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./127.5, offset=-1)
 
     image = tf.image.resize_with_crop_or_pad(image, 256, 256)
@@ -17,11 +17,12 @@ def prepare_image(file):
      
 
 def get_data(batch_size):
+    # exit(0)
     # ds = tfds.load('imagenet_v2', split='test', shuffle_files=True)
     # mnist_builder = tfds.builder("stanford_dogs")
-    mnist_builder = tfds.builder("bee_dataset")
-    mnist_info = mnist_builder.info
+    mnist_builder = tfds.builder("cassava")
     mnist_builder.download_and_prepare()
+    # print("here")
     dataset = mnist_builder.as_dataset()["train"]
 
     assert isinstance(dataset, tf.data.Dataset)
