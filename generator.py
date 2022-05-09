@@ -1,3 +1,4 @@
+from cProfile import label
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import tensorflow_io as tfio
@@ -27,16 +28,17 @@ class Generator(tf.keras.Model):
             Decoder_Block(256,4),
             Decoder_Block(128,4),
             Decoder_Block(64,4),
-            tf.keras.layers.Conv2DTranspose(2, 4, strides=2, padding='same', activation='tanh')
+            tf.keras.layers.Conv2DTranspose(2, 4, strides=2, padding='same')
         ]
 
         self.optimizer = tf.keras.optimizers.Adam()
 
+    # @tf.function
     def call(self, input):
         encoder_outs = []
         for i,layer in enumerate(self.encoders):
             if i == 0:
-                encoder_outs.append(layer(input))
+                encoder_outs.append(layer(input[:,:,:,:1]))
             else:
                 encoder_outs.append(layer(encoder_outs[-1]))
         
@@ -51,12 +53,18 @@ class Generator(tf.keras.Model):
         # print(decoder_out[0].numpy())
         # exit(0)
         
-        l_with_ab = tf.concat([input, decoder_out], axis=-1)
-        print(decoder_out[0,100:110,100:110,0])
-        print(decoder_out[0,100:110,100:110,1])
-        # print(l_with_ab.shape)
-        # pil_img = tf.keras.preprocessing.image.array_to_img(input[0].numpy())
-        # pil_img.show()
+        l_with_ab = tf.concat([input[:,:,:,:1], decoder_out], axis=-1)
+        # print(decoder_out[0,100:110,100:110,0])
+        # print(decoder_out[0,100:110,100:110,1])
+        # print(input[0,100:110,100:110,1])
+        # print(input[0,100:110,100:110,2])
+        # # print(image[100:110,100:110,0])
+        # # print(image[100:110,100:110,1])
+        # # print(image[100:110,100:110,2])
+        # # print(l_with_ab.shape)
+        
+        pil_img = tf.keras.preprocessing.image.array_to_img(tfio.experimental.color.lab_to_rgb(input[0]).numpy())
+        pil_img.show()
         pil_img = tf.keras.preprocessing.image.array_to_img(tfio.experimental.color.lab_to_rgb(l_with_ab[0]).numpy())
         pil_img.show()
         return decoder_out
@@ -69,8 +77,14 @@ class Generator(tf.keras.Model):
         mae_loss_fn = tf.keras.losses.MeanAbsoluteError()
 
         mae_loss = tf.reduce_mean(mae_loss_fn(real, fake))
+        print("d_loss:")
+        print(d_loss.numpy())
 
-        return d_loss + mae_loss * l
+        print("mae loss:")
+        print(mae_loss.numpy())
+
+        # return d_loss + mae_loss * l
+        return mae_loss
 
 
 
