@@ -16,30 +16,21 @@ def train_epoch(generator, discriminator, dataset, new=True):
     progbar = tf.keras.utils.Progbar(len(list(dataset)))
 
     for i, (bw_images, color_images) in enumerate(dataset):
-        # color_images = color_images.numpy()
-        # # print(color_images[0])
-        # # color_images[:,:,:,0] = color_images[:,:,:,0] / 50. - 1
-        # # color_images[:,:,:,1] = (color_images[:,:,:,1] + 86.185) / 184.439
-        # # color_images[:,:,:,2] = (color_images[:,:,:,2] + 107.863) / 202.345
-        # print(color_images[:,:,:,0].min())
-        # print(color_images[:,:,:,1].min())
-        # print(color_images[:,:,:,2].min())
-        # print(color_images[:,:,:,0].max())
-        # print(color_images[:,:,:,1].max())
-        # print(color_images[:,:,:,2].max())
-        
-        # print("____________________")
-        # continue
-        # l_with_ab = tf.concat([color_images[:,:,:,:1], generator(color_images)], axis=-1).numpy()
-        # print(l_with_ab[0])
-        # l_with_ab[:,:,:,0] = (l_with_ab[:,:,:,0] + 1) * 50
-        # l_with_ab[:,:,:,1] = (l_with_ab[:,:,:,1] * 184.439) - 86.185
-        # l_with_ab[:,:,:,2] = (l_with_ab[:,:,:,2] * 202.345) - 107.863
-        # print(l_with_ab[0])
-        # exit(0)
-        # pil_img = tf.keras.preprocessing.image.array_to_img(tfio.experimental.color.lab_to_rgb(input[0]))
-        # pil_img.show()
-        # generator step
+        if i % 10 == 0:
+            l_with_ab = tf.concat([color_images[:,:,:,:1], generator(color_images)], axis=-1)
+            # print(decoder_out[0,100:110,100:110,0])
+            # print(decoder_out[0,100:110,100:110,1])
+            # print(input[0,100:110,100:110,1])
+            # print(input[0,100:110,100:110,2])
+            # # print(image[100:110,100:110,0])
+            # # print(image[100:110,100:110,1])
+            # # print(image[100:110,100:110,2])
+            # # print(l_with_ab.shape)
+            
+            pil_img = tf.keras.preprocessing.image.array_to_img(tfio.experimental.color.lab_to_rgb(color_images[0]).numpy())
+            pil_img.show()
+            pil_img = tf.keras.preprocessing.image.array_to_img(tfio.experimental.color.lab_to_rgb(l_with_ab[0]).numpy())
+            pil_img.show()
         with tf.GradientTape(persistent=True) as tape:
             fake_images = generator(color_images)
             # color_images[:,:,:,0] = color_images[:,:,:,0] / 50. - 1

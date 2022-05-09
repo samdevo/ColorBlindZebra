@@ -33,7 +33,7 @@ class Generator(tf.keras.Model):
 
         self.optimizer = tf.keras.optimizers.Adam()
 
-    # @tf.function
+    @tf.function
     def call(self, input):
         encoder_outs = []
         for i,layer in enumerate(self.encoders):
@@ -53,23 +53,10 @@ class Generator(tf.keras.Model):
         # print(decoder_out[0].numpy())
         # exit(0)
         
-        l_with_ab = tf.concat([input[:,:,:,:1], decoder_out], axis=-1)
-        # print(decoder_out[0,100:110,100:110,0])
-        # print(decoder_out[0,100:110,100:110,1])
-        # print(input[0,100:110,100:110,1])
-        # print(input[0,100:110,100:110,2])
-        # # print(image[100:110,100:110,0])
-        # # print(image[100:110,100:110,1])
-        # # print(image[100:110,100:110,2])
-        # # print(l_with_ab.shape)
         
-        pil_img = tf.keras.preprocessing.image.array_to_img(tfio.experimental.color.lab_to_rgb(input[0]).numpy())
-        pil_img.show()
-        pil_img = tf.keras.preprocessing.image.array_to_img(tfio.experimental.color.lab_to_rgb(l_with_ab[0]).numpy())
-        pil_img.show()
         return decoder_out
 
-    def loss_function(self, fake, d_fake, real, l=10000):
+    def loss_function(self, fake, d_fake, real, l=1000):
         d_loss_fn = tf.nn.sigmoid_cross_entropy_with_logits
 
         d_loss = tf.reduce_mean(d_loss_fn(tf.ones_like(d_fake), d_fake))
@@ -83,8 +70,8 @@ class Generator(tf.keras.Model):
         print("mae loss:")
         print(mae_loss.numpy())
 
-        # return d_loss + mae_loss * l
-        return mae_loss
+        return d_loss + mae_loss * l
+        # return mae_loss
 
 
 
