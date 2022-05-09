@@ -9,7 +9,7 @@ import tensorflow_io as tfio
 def prepare_image(file, rgb=False):
     image = tf.cast(file["image"], tf.float32)
 
-    normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./127.5, offset=-1)
+    normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./255.)
 
     image = tf.image.resize_with_crop_or_pad(image, 256, 256)
     image = normalization_layer(image)
