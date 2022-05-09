@@ -1,5 +1,6 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import tensorflow_io as tfio
 
 
 class Generator(tf.keras.Model):
@@ -8,7 +9,7 @@ class Generator(tf.keras.Model):
 
 
         self.encoders = [
-            Encoder_Block(64, 4, batchnorm=False, input_shape=(256,256,3)),
+            Encoder_Block(64, 4, batchnorm=False, input_shape=(256,256,1)),
             Encoder_Block(128,4),
             Encoder_Block(256,4),
             Encoder_Block(512,4),
@@ -26,7 +27,7 @@ class Generator(tf.keras.Model):
             Decoder_Block(256,4),
             Decoder_Block(128,4),
             Decoder_Block(64,4),
-            tf.keras.layers.Conv2DTranspose(3, 4, strides=2, padding='same', activation='tanh')
+            tf.keras.layers.Conv2DTranspose(2, 4, strides=2, padding='same', activation='tanh')
         ]
 
         self.optimizer = tf.keras.optimizers.Adam()
@@ -49,9 +50,14 @@ class Generator(tf.keras.Model):
                 decoder_out = layer(concat)
         # print(decoder_out[0].numpy())
         # exit(0)
-        pil_img = tf.keras.preprocessing.image.array_to_img(input[0].numpy())
-        pil_img.show()
-        pil_img = tf.keras.preprocessing.image.array_to_img(decoder_out[0].numpy())
+        
+        l_with_ab = tf.concat([input, decoder_out], axis=-1)
+        print(decoder_out[0,100:110,100:110,0])
+        print(decoder_out[0,100:110,100:110,1])
+        # print(l_with_ab.shape)
+        # pil_img = tf.keras.preprocessing.image.array_to_img(input[0].numpy())
+        # pil_img.show()
+        pil_img = tf.keras.preprocessing.image.array_to_img(tfio.experimental.color.lab_to_rgb(l_with_ab[0]).numpy())
         pil_img.show()
         return decoder_out
 
@@ -72,7 +78,6 @@ class Generator(tf.keras.Model):
 class Encoder_Block(tf.keras.layers.Layer):
     def __init__(self, num_filters, kernel_size=3, strides=2, batchnorm=True, input_shape=None, padding='same'):
         super(Encoder_Block, self).__init__()
-        print(input_shape)
         if input_shape is not None: 
             self.conv_layer = tf.keras.layers.Conv2D(
                 num_filters, 
@@ -86,7 +91,7 @@ class Encoder_Block(tf.keras.layers.Layer):
                 num_filters, 
                 kernel_size, 
                 strides=strides, 
-                padding='same'
+                padding=padding
             )
         self.batch_norm = batchnorm
         if batchnorm:
@@ -95,6 +100,8 @@ class Encoder_Block(tf.keras.layers.Layer):
     
     @tf.function
     def call(self, inputs):
+        print(inputs.shape)
+        # print(self.conv_layer.input_shape)
         conv_out = self.conv_layer(inputs)
         if self.batch_norm:
             batch_norm_out = self.batch_norm(conv_out)

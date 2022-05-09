@@ -1,16 +1,23 @@
 import tensorflow as tf
 import tensorflow_datasets as tfds
+import tensorflow_io as tfio
 
 
 
 
-def prepare_image(file):
+def prepare_image(file, rgb=False):
     image = file["image"]
     normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./127.5, offset=-1)
 
     image = tf.image.resize_with_crop_or_pad(image, 256, 256)
     image = normalization_layer(image)
-    image_bw = tf.image.grayscale_to_rgb(tf.image.rgb_to_grayscale(image))
+    if rgb:
+        image_bw = tf.image.rgb_to_grayscale(image)
+    else:
+        image = tfio.experimental.color.rgb_to_lab(image)
+        image_bw = image[:,:,:1]
+        # print(image_bw.shape)
+        # exit(0)
 
     return image_bw, image
 

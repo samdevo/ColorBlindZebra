@@ -18,7 +18,10 @@ class Discriminator(tf.keras.Model):
         self.optimizer = tf.keras.optimizers.Adam()
 
     def call(self, input, target):
-        encoded = tf.keras.layers.Concatenate()([input, target])
+        encoded = tf.concat([input, target], axis=-1)
+        print(encoded.shape)
+        print("sending to layers...")
+        # exit(0)
 
         for layer in self.encoders:
             encoded = layer(encoded)
