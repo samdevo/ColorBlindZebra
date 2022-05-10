@@ -5,7 +5,7 @@ from discriminator import Discriminator
 
 from generator import Generator
 # from preprocess import get_data, make_BW_images
-from preprocessSam import get_data as get_data_sam
+from preprocessing import get_data as get_data_sam
 import datetime
 from train import train_epoch
 

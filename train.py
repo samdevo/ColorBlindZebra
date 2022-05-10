@@ -1,7 +1,7 @@
 import tensorflow as tf
 import os
 import tensorflow_io as tfio
-from preprocessSam import norm_imgs, denorm_imgs
+from preprocessing import norm_imgs, denorm_imgs
 # from skimage.color import rgb2lab, lab2rgb
 
 
@@ -20,7 +20,7 @@ def train_epoch(generator, discriminator, dataset, new=True):
     for i, color_images in enumerate(dataset):
         color_images = norm_imgs(color_images)
         # print(color_images)
-        if i % 10 == 0:
+        if i % 50 == 0:
             l_with_ab = tf.concat([color_images[...,:1], generator(color_images)], axis=-1)
             # print(decoder_out[0,100:110,100:110,0])
             # print(decoder_out[0,100:110,100:110,1])
@@ -48,11 +48,11 @@ def train_epoch(generator, discriminator, dataset, new=True):
 
             gen_loss = generator.loss_function(fake_images, d_fake, color_images[:,:,:,1:])
 
-            print(gen_loss)
-
             d_real = discriminator(color_images[...,:1], color_images[:,:,:,1:])
 
             d_loss = discriminator.loss_function(d_real, d_fake)
+
+            # print("d_loss: " + str(d_loss))
 
         gen_grads = tape.gradient(gen_loss, generator.trainable_variables)
         disc_grads = tape.gradient(d_loss, discriminator.trainable_variables)

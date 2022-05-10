@@ -64,11 +64,11 @@ class Generator(tf.keras.Model):
         mae_loss_fn = tf.keras.losses.MeanAbsoluteError()
 
         mae_loss = tf.reduce_mean(mae_loss_fn(real, fake))
-        print("d_loss:")
-        print(d_loss.numpy())
+        # print("d_loss:")
+        # print(d_loss.numpy())
 
-        print("mae loss:")
-        print(mae_loss.numpy())
+        # print("mae loss:")
+        # print(mae_loss.numpy())
 
         return d_loss + mae_loss * l
         # return mae_loss
@@ -101,7 +101,6 @@ class Encoder_Block(tf.keras.layers.Layer):
     
     @tf.function
     def call(self, inputs):
-        print(inputs.shape)
         # print(self.conv_layer.input_shape)
         conv_out = self.conv_layer(inputs)
         if self.batch_norm:
