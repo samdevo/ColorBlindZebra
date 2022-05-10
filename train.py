@@ -42,7 +42,7 @@ def train_epoch(generator, discriminator, dataset, new=True):
             # color_images[:,:,:,2] = (color_images[:,:,:,2] + 107.863) / 202.345
 
            
-            d_fake = discriminator(color_images[:,:,:,:1], fake_images)
+            d_fake = discriminator(color_images[...,:1], fake_images)
             # print(fake_images.shape)
             # print(color_images[:,:,:,1:].shape)
 

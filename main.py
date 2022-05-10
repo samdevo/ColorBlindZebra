@@ -11,7 +11,6 @@ from train import train_epoch
 
 
 if __name__ == '__main__':
-    print("helluh")
     # exit(0)
     gen_model = Generator()
     disc_model = Discriminator()

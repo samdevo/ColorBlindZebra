@@ -19,7 +19,7 @@ def norm_imgs(images):
 
 
 def prepare_image(file):
-    image = tf.cast(file["input"], tf.float32)
+    image = tf.cast(file["image"], tf.float32)
 
     normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./255.)
 
@@ -57,7 +57,7 @@ def get_data(batch_size):
     # exit(0)
     # ds = tfds.load('imagenet_v2', split='test', shuffle_files=True)
     # mnist_builder = tfds.builder("stanford_dogs")
-    mnist_builder = tfds.builder("bee_dataset")
+    mnist_builder = tfds.builder("imagenette/320px")
     mnist_builder.download_and_prepare()
     # print("here")
     dataset = mnist_builder.as_dataset()["train"]
