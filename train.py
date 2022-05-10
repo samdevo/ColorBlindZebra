@@ -21,7 +21,9 @@ def train_epoch(generator, discriminator, dataset, new=True):
         color_images = norm_imgs(color_images)
         # print(color_images)
         if i % 25 == 0:
+            bw = tf.concat([color_images[...,:1], tf.zeros_like(color_images[...,1:])], axis=-1)
             l_with_ab = tf.concat([color_images[...,:1], generator(color_images)], axis=-1)
+            just_colors = tf.concat([tf.ones_like(color_images[...,:1]), generator(color_images)], axis=-1)
             # print(decoder_out[0,100:110,100:110,0])
             # print(decoder_out[0,100:110,100:110,1])
             # print(input[0,100:110,100:110,1])
@@ -31,10 +33,10 @@ def train_epoch(generator, discriminator, dataset, new=True):
             # # print(image[100:110,100:110,2])
             # # print(l_with_ab.shape)
             
-            pil_img = tf.keras.preprocessing.image.array_to_img(denorm_imgs(color_images[0]).numpy())
+            pil_img = tf.keras.preprocessing.image.array_to_img(denorm_imgs(tf.concat([bw[0], color_images[0], l_with_ab[0], just_colors[0]], axis=1)).numpy())
             pil_img.show()
-            pil_img = tf.keras.preprocessing.image.array_to_img(denorm_imgs(l_with_ab[0]).numpy())
-            pil_img.show()
+            # pil_img = tf.keras.preprocessing.image.array_to_img(denorm_imgs(l_with_ab[0]).numpy())
+            # pil_img.show()
         with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
             fake_images = generator(color_images)
             # color_images[:,:,:,0] = color_images[:,:,:,0] / 50. - 1
