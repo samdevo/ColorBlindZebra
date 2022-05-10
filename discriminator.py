@@ -23,8 +23,12 @@ class Discriminator(tf.keras.Model):
         # print("sending to layers...")
         # exit(0)
 
-        for layer in self.encoders:
+        for layer in self.encoders[:-1]:
             encoded = layer(encoded)
+
+        zero_pad1 = tf.keras.layers.ZeroPadding2D()(encoded) 
+
+        encoded = self.encoders[-1](zero_pad1)
 
         padded = tf.keras.layers.ZeroPadding2D()(encoded)
 
