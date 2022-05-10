@@ -1,6 +1,8 @@
 import tensorflow as tf
 import os
 import tensorflow_io as tfio
+from preprocessSam import norm_imgs, denorm_imgs
+# from skimage.color import rgb2lab, lab2rgb
 
 
 checkpoint_directory = "/tmp/training_checkpoints"
@@ -15,9 +17,11 @@ def train_epoch(generator, discriminator, dataset, new=True):
 
     progbar = tf.keras.utils.Progbar(len(list(dataset)))
 
-    for i, (bw_images, color_images) in enumerate(dataset):
+    for i, color_images in enumerate(dataset):
+        color_images = norm_imgs(color_images)
+        # print(color_images)
         if i % 10 == 0:
-            l_with_ab = tf.concat([color_images[:,:,:,:1], generator(color_images)], axis=-1)
+            l_with_ab = tf.concat([color_images[...,:1], generator(color_images)], axis=-1)
             # print(decoder_out[0,100:110,100:110,0])
             # print(decoder_out[0,100:110,100:110,1])
             # print(input[0,100:110,100:110,1])
@@ -27,9 +31,9 @@ def train_epoch(generator, discriminator, dataset, new=True):
             # # print(image[100:110,100:110,2])
             # # print(l_with_ab.shape)
             
-            pil_img = tf.keras.preprocessing.image.array_to_img(tfio.experimental.color.lab_to_rgb(color_images[0]).numpy())
+            pil_img = tf.keras.preprocessing.image.array_to_img(denorm_imgs(color_images[0]).numpy())
             pil_img.show()
-            pil_img = tf.keras.preprocessing.image.array_to_img(tfio.experimental.color.lab_to_rgb(l_with_ab[0]).numpy())
+            pil_img = tf.keras.preprocessing.image.array_to_img(denorm_imgs(l_with_ab[0]).numpy())
             pil_img.show()
         with tf.GradientTape(persistent=True) as tape:
             fake_images = generator(color_images)
@@ -39,14 +43,14 @@ def train_epoch(generator, discriminator, dataset, new=True):
 
            
             d_fake = discriminator(color_images[:,:,:,:1], fake_images)
-            print(fake_images.shape)
-            print(color_images[:,:,:,1:].shape)
+            # print(fake_images.shape)
+            # print(color_images[:,:,:,1:].shape)
 
             gen_loss = generator.loss_function(fake_images, d_fake, color_images[:,:,:,1:])
 
             print(gen_loss)
 
-            d_real = discriminator(bw_images, color_images[:,:,:,1:])
+            d_real = discriminator(color_images[...,:1], color_images[:,:,:,1:])
 
             d_loss = discriminator.loss_function(d_real, d_fake)
 

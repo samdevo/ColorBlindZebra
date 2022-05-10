@@ -28,7 +28,7 @@ class Generator(tf.keras.Model):
             Decoder_Block(256,4),
             Decoder_Block(128,4),
             Decoder_Block(64,4),
-            tf.keras.layers.Conv2DTranspose(2, 4, strides=2, padding='same')
+            tf.keras.layers.Conv2DTranspose(2, 4, strides=2, padding='same', activation='tanh')
         ]
 
         self.optimizer = tf.keras.optimizers.Adam()
