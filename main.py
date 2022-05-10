@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     # images = get_data('cifar-10-python.tar.gz')
     # images_BW = make_BW_images('cifar-10-python.tar.gz')
-    dataset = get_data_sam(4)
+    dataset = get_data_sam(1)
     # bw = tf.image.rgb_to_grayscale(images)
 
     # i = 0

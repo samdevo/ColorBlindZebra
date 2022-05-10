@@ -28,10 +28,10 @@ class Generator(tf.keras.Model):
             Decoder_Block(256,4),
             Decoder_Block(128,4),
             Decoder_Block(64,4),
-            tf.keras.layers.Conv2DTranspose(2, 4, strides=2, padding='same', activation='tanh')
+            tf.keras.layers.Conv2DTranspose(2, 4, strides=2, padding='same', activation='tanh', kernel_initializer=tf.random_normal_initializer(0., 0.02))
         ]
 
-        self.optimizer = tf.keras.optimizers.Adam()
+        self.optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
 
     @tf.function
     def call(self, input):
@@ -57,20 +57,21 @@ class Generator(tf.keras.Model):
         return decoder_out
 
     def loss_function(self, fake, d_fake, real, l=1000):
-        d_loss_fn = tf.nn.sigmoid_cross_entropy_with_logits
+        d_loss_fn = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
         d_loss = tf.reduce_mean(d_loss_fn(tf.ones_like(d_fake), d_fake))
 
-        mae_loss_fn = tf.keras.losses.MeanAbsoluteError()
+        mae_loss_fn = tf.keras.losses.MeanAbsoluteError(reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE)
+        # mae_loss_fn = tf.keras.losses.MeanSquaredError()
 
-        mae_loss = tf.reduce_mean(mae_loss_fn(real, fake))
+        mae_loss = mae_loss_fn(real, fake)
         # print("d_loss:")
         # print(d_loss.numpy())
 
         # print("mae loss:")
         # print(mae_loss.numpy())
 
-        return d_loss + mae_loss * l
+        return d_loss + mae_loss * l, mae_loss, d_loss
         # return mae_loss
 
 
@@ -85,14 +86,16 @@ class Encoder_Block(tf.keras.layers.Layer):
                 kernel_size, 
                 strides=strides, 
                 padding=padding, 
-                input_shape=input_shape
+                input_shape=input_shape,
+                kernel_initializer=tf.random_normal_initializer(0., 0.02)
             )
         else:
             self.conv_layer = tf.keras.layers.Conv2D(
                 num_filters, 
                 kernel_size, 
                 strides=strides, 
-                padding=padding
+                padding=padding,
+                kernel_initializer=tf.random_normal_initializer(0., 0.02)
             )
         self.batch_norm = batchnorm
         if batchnorm:
@@ -115,12 +118,13 @@ class Encoder_Block(tf.keras.layers.Layer):
 class Decoder_Block(tf.keras.layers.Layer):
     def __init__(self, num_filters, kernel_size=3, strides=2):
         super(Decoder_Block, self).__init__()
-
+        
         self.conv_t_layer = tf.keras.layers.Conv2DTranspose(
             num_filters, 
             kernel_size, 
             strides=strides, 
-            padding='same'
+            padding='same',
+            kernel_initializer=tf.random_normal_initializer(0., 0.02)
         )
 
         self.batch_norm = tf.keras.layers.BatchNormalization()
