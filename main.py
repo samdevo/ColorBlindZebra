@@ -5,7 +5,7 @@ from discriminator import Discriminator
 
 from generator import Generator
 # from preprocess import get_data, make_BW_images
-from preprocessing import get_data as get_data_sam
+from preprocessing import get_data
 import datetime
 from train import train_epoch
 
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     # images = get_data('cifar-10-python.tar.gz')
     # images_BW = make_BW_images('cifar-10-python.tar.gz')
-    dataset = get_data_sam(1)
+    dataset = get_data(4)
     # bw = tf.image.rgb_to_grayscale(images)
 
     # i = 0
@@ -45,6 +45,6 @@ if __name__ == '__main__':
 
     log_dir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_graph=True)
-    train_epoch(gen_model, disc_model, dataset)
+    for i in range(10): train_epoch(gen_model, disc_model, dataset.shuffle(1024).batch(4), i)
 
     tf.keras.utils.plot_model(gen_model, show_shapes=True, dpi=64)

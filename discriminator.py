@@ -43,9 +43,9 @@ class Discriminator(tf.keras.Model):
         real_loss = loss_fn(tf.ones_like(d_real), d_real)
 
         fake_loss = loss_fn(tf.zeros_like(d_fake), d_fake)
-        print("")
-        print(f"real_loss: {str(tf.reduce_mean(real_loss).numpy())}")
-        print(f"fake_loss: {str(tf.reduce_mean(fake_loss).numpy())}")
+        # print("")
+        # print(f"real_loss: {str(tf.reduce_mean(real_loss).numpy())}")
+        # print(f"fake_loss: {str(tf.reduce_mean(fake_loss).numpy())}")
 
         return tf.reduce_mean(real_loss + fake_loss)
 

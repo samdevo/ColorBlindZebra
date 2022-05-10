@@ -8,7 +8,7 @@ from preprocessing import norm_imgs, denorm_imgs
 # checkpoint_directory = "/tmp/training_checkpoints"
 # checkpoint_prefix = os.path.join(checkpoint_directory, "ckpt")
 
-def train_epoch(generator, discriminator, dataset, new=True):
+def train_epoch(generator, discriminator, dataset, epoch):
     
     progbar = tf.keras.utils.Progbar(len(list(dataset)))
 
@@ -16,7 +16,7 @@ def train_epoch(generator, discriminator, dataset, new=True):
         # convert rgb images to lab (can't do this in preprocessing b/c can't do these operations to tensors
         color_images = norm_imgs(color_images)
         # see how training's going
-        if i % 25 == 0: save_example(i, color_images, generator(color_images))
+        if i % 25 == 0: save_example(epoch, i, color_images, generator(color_images))
         with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
             fake_images = generator(color_images)
             d_fake = discriminator(color_images[...,:1], fake_images)
@@ -39,10 +39,10 @@ def train_epoch(generator, discriminator, dataset, new=True):
         progbar.update(i, [("gen_mae_loss", gen_mae_loss), ("gen_d_loss", gen_d_loss), ("disc_loss", d_loss)])
 
 
-def save_example(i, color_images, generated):
+def save_example(epoch, i, color_images, generated):
     bw = tf.concat([color_images[...,:1], tf.zeros_like(color_images[...,1:])], axis=-1)
     l_with_ab = tf.concat([color_images[...,:1], generated], axis=-1)
     just_colors = tf.concat([tf.zeros_like(color_images[...,:1]), generated], axis=-1)
     real_colors = tf.concat([tf.zeros_like(color_images[...,:1]), color_images[...,1:]], axis=-1)
     pil_img = tf.keras.preprocessing.image.array_to_img(denorm_imgs(tf.concat([bw[0], color_images[0], l_with_ab[0], just_colors[0], real_colors[0]], axis=1)).numpy())
-    pil_img.save(f"gen_imgs/nodiscrim-batch{str(i)}.png")
+    pil_img.save(f"gen_imgs/epoch{str(epoch)}-batch{str(i)}.png")

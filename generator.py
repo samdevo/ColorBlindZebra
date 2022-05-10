@@ -21,9 +21,9 @@ class Generator(tf.keras.Model):
         ]
 
         self.decoders = [
-            Decoder_Block(512,4),
-            Decoder_Block(512,4),
-            Decoder_Block(512,4),
+            Decoder_Block(512,4, dropout=True),
+            Decoder_Block(512,4, dropout=True),
+            Decoder_Block(512,4, dropout=True),
             Decoder_Block(512,4),
             Decoder_Block(256,4),
             Decoder_Block(128,4),
@@ -56,21 +56,12 @@ class Generator(tf.keras.Model):
         
         return decoder_out
 
-    def loss_function(self, fake, d_fake, real, l=1000):
+    def loss_function(self, fake, d_fake, real, l=100):
         d_loss_fn = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-
         d_loss = tf.reduce_mean(d_loss_fn(tf.ones_like(d_fake), d_fake))
-
-        mae_loss_fn = tf.keras.losses.MeanAbsoluteError(reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE)
+        mae_loss_fn = tf.keras.losses.MeanAbsoluteError()
         # mae_loss_fn = tf.keras.losses.MeanSquaredError()
-
-        mae_loss = mae_loss_fn(real, fake)
-        # print("d_loss:")
-        # print(d_loss.numpy())
-
-        # print("mae loss:")
-        # print(mae_loss.numpy())
-
+        mae_loss = tf.reduce_mean(mae_loss_fn(fake, real))
         return d_loss + mae_loss * l, mae_loss, d_loss
         # return mae_loss
 
@@ -116,8 +107,9 @@ class Encoder_Block(tf.keras.layers.Layer):
 
 
 class Decoder_Block(tf.keras.layers.Layer):
-    def __init__(self, num_filters, kernel_size=3, strides=2):
-        super(Decoder_Block, self).__init__()
+    def __init__(self, num_filters, kernel_size=3, strides=2, dropout=False):
+        super(Decoder_Block, self).__init__()  
+        self.dropout = dropout
         
         self.conv_t_layer = tf.keras.layers.Conv2DTranspose(
             num_filters, 
@@ -134,6 +126,7 @@ class Decoder_Block(tf.keras.layers.Layer):
     def call(self, inputs):
         conv_out = self.conv_t_layer(inputs)
         batch_norm_out = self.batch_norm(conv_out)
+        if self.dropout: batch_norm_out = tf.keras.layers.Dropout(0.5)(batch_norm_out)
         relu_out = self.relu(batch_norm_out)
 
         return relu_out
