@@ -1,7 +1,4 @@
-from cProfile import label
 import tensorflow as tf
-import matplotlib.pyplot as plt
-import tensorflow_io as tfio
 
 
 class Generator(tf.keras.Model):
@@ -28,8 +25,14 @@ class Generator(tf.keras.Model):
             Decoder_Block(256,4),
             Decoder_Block(128,4),
             Decoder_Block(64,4),
-            tf.keras.layers.Conv2DTranspose(2, 4, strides=2, padding='same', activation='tanh', kernel_initializer=tf.random_normal_initializer(0., 0.02))
+            tf.keras.layers.Conv2DTranspose(2, 4, 
+                strides=2, 
+                padding='same', 
+                activation='tanh', 
+                kernel_initializer=tf.random_normal_initializer(0., 0.02)
+                ) 
         ]
+        # the initializer and learning rate parameters are from https://www.tensorflow.org/tutorials/generative/pix2pix
 
         self.optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
 
@@ -38,7 +41,7 @@ class Generator(tf.keras.Model):
         encoder_outs = []
         for i,layer in enumerate(self.encoders):
             if i == 0:
-                encoder_outs.append(layer(input[:,:,:,:1]))
+                encoder_outs.append(layer(input[...,:1]))
             else:
                 encoder_outs.append(layer(encoder_outs[-1]))
         
@@ -50,8 +53,6 @@ class Generator(tf.keras.Model):
                 corresponding_encoded = encoder_outs[len(self.decoders) - i - 1]
                 concat = tf.keras.layers.Concatenate()([decoder_out, corresponding_encoded])
                 decoder_out = layer(concat)
-        # print(decoder_out[0].numpy())
-        # exit(0)
         
         
         return decoder_out
@@ -60,13 +61,8 @@ class Generator(tf.keras.Model):
         d_loss_fn = tf.keras.losses.BinaryCrossentropy(from_logits=True)
         d_loss = tf.reduce_mean(d_loss_fn(tf.ones_like(d_fake), d_fake))
         mae_loss_fn = tf.keras.losses.MeanAbsoluteError()
-        # mae_loss_fn = tf.keras.losses.MeanSquaredError()
         mae_loss = tf.reduce_mean(mae_loss_fn(fake, real))
         return d_loss + mae_loss * l, mae_loss, d_loss
-        # return mae_loss
-
-
-
 
 class Encoder_Block(tf.keras.layers.Layer):
     def __init__(self, num_filters, kernel_size=3, strides=2, batchnorm=True, input_shape=None, padding='same'):
@@ -95,7 +91,6 @@ class Encoder_Block(tf.keras.layers.Layer):
     
     @tf.function
     def call(self, inputs):
-        # print(self.conv_layer.input_shape)
         conv_out = self.conv_layer(inputs)
         if self.batch_norm:
             batch_norm_out = self.batch_norm(conv_out)

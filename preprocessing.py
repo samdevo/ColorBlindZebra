@@ -27,13 +27,12 @@ def prepare_image(file):
 
      
 # prepares and batches dataset
-def get_data(batch_size):
+def get_data():
     
     mnist_builder = tfds.builder("tf_flowers")
     mnist_builder.download_and_prepare()
     dataset = mnist_builder.as_dataset()["train"]
     
-
     assert isinstance(dataset, tf.data.Dataset)
 
     dataset = dataset.map(prepare_image)
