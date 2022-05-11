@@ -1,12 +1,6 @@
 import tensorflow as tf
-import os
-import tensorflow_io as tfio
 from preprocessing import norm_imgs, denorm_imgs
-# from skimage.color import rgb2lab, lab2rgb
 
-
-# checkpoint_directory = "/tmp/training_checkpoints"
-# checkpoint_prefix = os.path.join(checkpoint_directory, "ckpt")
 
 def train_epoch(generator, discriminator, dataset, epoch):
     
