@@ -1,5 +1,9 @@
 # ColorBlindZebra
 
+## Poster:
+
+![](https://i.postimg.cc/k589rgpX/dlposter-offline-copy.png)
+
 ## Introduction
 
 We are trying to colorize black and white images. We are interested in what images that are black and white would look like in color, especially old images which weren't originally captured with color.
